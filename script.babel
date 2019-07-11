@@ -1,0 +1,92 @@
+// Initialize array to store quotes & authors
+let quoteList = [];
+
+// Parse JSON data and push to dataset array
+document.addEventListener('DOMContentLoaded',function(){
+  req=new XMLHttpRequest();
+  req.open("GET", 'https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json', true);
+  req.send();
+  req.onload=function() {
+    json=JSON.parse(req.responseText);
+    for(let object in json.quotes) {
+      quoteList.push(json.quotes[object]);
+    }
+
+    // Find the "New Quote" button within the DOM
+    const newQuoteBtn = document.querySelector('#new-quote');
+
+    /* Function to pick a random number. Inspired by the following post:
+       https://stackoverflow.com/questions/30061969/select-random-object-from-json
+    */
+    function randomNumberPicker(value) {
+      return Math.floor(Math.random()*value);
+    }
+    
+    // Find the quote
+    const quote = document.getElementById('text');
+    
+    // Find the author
+    const author = document.getElementById('author');
+    
+    // Use randomNumberPicker() to choose a quote from the JSON data
+    function pickRandomQuote() {
+
+      // Generate a random number (limited by the number of quotes)
+      let randomQuoteNumber = randomNumberPicker(quoteList.length);
+
+      // Update the quote & the author based on the random number generated above
+      quote.textContent = '"' + quoteList[randomQuoteNumber].quote + '"';
+      author.textContent = "- " + quoteList[randomQuoteNumber].author;
+    }
+
+    // Find the body tag
+    const body = document.querySelector('body');
+
+    // Find all buttons on the page
+    const allBtns = document.querySelectorAll('#quote-box button');
+
+    // Set a color array, which will be used to change the background & button colors
+    const colors = ["#001f3f", "#0074D9", "#7FDBFF", "#39CCCC", "#3D9970", "#2ECC40", "#FFDC00", "#FF851B", "#FF4136", "#85144b", "#D86C70"];
+
+    // Use randomNumberPicker() to choose a color from the above array
+    function pickRandomColor() {
+
+      // Generate a random number (limited by the number of colors)      
+      let randomColorIndex = randomNumberPicker(colors.length);
+
+      // Update the background color of the body
+      body.style.transition = "all .3s ease-out";
+      body.style.background = colors[randomColorIndex];
+
+      // Loop through the nodelist and update the background color of the buttons
+      for(let i = 0; i < allBtns.length; i++) {
+        allBtns[i].style.transition = "all .3s ease-out";     
+        allBtns[i].style.background = colors[randomColorIndex];      
+      }
+
+    }
+
+    // Event listener that generates a random quote upon clicking the "New Quote" button
+    newQuoteBtn.addEventListener('click', function(event) {
+      pickRandomQuote();
+      pickRandomColor();
+    })
+    
+    // Find the "tweet quote" button
+    const tweetQuoteBtn = document.querySelector('#tweet-quote');
+    
+    // Function to pre-populate tweet with quote & author name
+    function urlIfy(text) {
+      return text.textContent.replace(/\s/g,"%20");
+    }
+    
+    pickRandomQuote();
+    pickRandomColor();
+    
+    // Event listener for tweet button
+    tweetQuoteBtn.addEventListener('click', function(event) {
+      tweetQuoteBtn.setAttribute('href', "http://twitter.com/intent/tweet?hashtags=quotes&text=" + urlIfy(quote) + "%20" + urlIfy(author));
+    })
+  } 
+  
+});
